@@ -159,7 +159,7 @@ See also: http://docs.python.org/library/re.html#re.I"
     (list output exit-code)))
 
 (defun vr--run-command (args success)
-  (multiple-value-bind (output exit-code) (vr--command args)
+  (cl-multiple-value-bind (output exit-code) (vr--command args)
     (cond ((equal exit-code 0) 
 	   (funcall success output))
 	  ((equal exit-code 1)
@@ -190,9 +190,9 @@ The message line is returned.
       (insert s)
       (goto-char (point-min))
       (let ((offset vr--target-buffer-start))
-	(loop while (and (vr--not-last-line) (/= (line-beginning-position) (line-end-position))) ;; loop until empty line is reached
+	(cl-loop while (and (vr--not-last-line) (/= (line-beginning-position) (line-end-position))) ;; loop until empty line is reached
 	      for i from 0 do
-	      (loop while (re-search-forward "\\([0-9]+\\) \\([0-9]+\\)" (line-end-position) t) ;; loop integer pairs in line
+	      (cl-loop while (re-search-forward "\\([0-9]+\\) \\([0-9]+\\)" (line-end-position) t) ;; loop integer pairs in line
 		    for j from 0 do
 		    (let ((begin (+ offset (string-to-number (match-string 1))))
 			  (end (+ offset (string-to-number (match-string 2)))))
@@ -210,7 +210,7 @@ and the message line."
     (with-temp-buffer
       (insert s)
       (goto-char (point-min))
-      (loop while (and (vr--not-last-line) (/= (line-beginning-position) (line-end-position))) ;; loop until empty line is reached
+      (cl-loop while (and (vr--not-last-line) (/= (line-beginning-position) (line-end-position))) ;; loop until empty line is reached
 	    for i from 0 do 
 	    (re-search-forward "\\([0-9]+\\) \\([0-9]+\\) " (line-end-position) t)
 	    (let ((replacement (buffer-substring-no-properties (point) (line-end-position)))
@@ -369,7 +369,7 @@ and the message line."
 	  (setq matches-vec (make-vector number-of-matches nil))
 	  (let ((cur-match (list)))
 	    (mapc (lambda (el)
-		    (multiple-value-bind (i j begin end) el
+		    (cl-multiple-value-bind (i j begin end) el
 		      (when (and (= j 0) (> i 0))
 		      	(aset matches-vec (- i 1) (nreverse cur-match))
 		      	(setq cur-match (list)))
