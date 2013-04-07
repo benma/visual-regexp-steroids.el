@@ -5,18 +5,6 @@ In addition to that, you can optionally use the better regexp syntax to power `i
 
 For now, Python is supported out of the box (tested on Linux and Windows). If you want to add custom scripts to enable your favorite language, please get in touch.
 
-## Examples
-
-Same example as in [visual-regexp](https://github.com/benma/visual-regexp.el), but this time using Python's regular expressions (note the absence of escape characters):
-
-![Example](https://github.com/benma/visual-regexp-steroids.el/raw/master/screenshots/screenshot0A.png)
-
-visual-regexp-steroids also features expressions as replacements (toggle with `C-c C-c`).
-![Example](https://github.com/benma/visual-regexp-steroids.el/raw/master/screenshots/montage1.png)
-
-Expressions have a predefined variables. `i`, the match counter, is one of them:
-![Example](https://github.com/benma/visual-regexp-steroids.el/raw/master/screenshots/montage2.png)
-
 ## Installation
 
 Requirements:
@@ -39,4 +27,18 @@ Add the following code to your init file. Of course you can select your own key 
 (define-key esc-map (kbd "C-s") 'pyregexp-isearch-forward) ;; C-M-s
 ```
 To customize, use `M-x customize-group [RET] visual-regexp`. You can specify how the Python interpreter is invoked by modifying the `vr/command-python` variable. The default is `python /path/to/visual-regexp-steroids/regexp.py`.
+
+
+
+## Examples
+
+Same example as in [visual-regexp](https://github.com/benma/visual-regexp.el), but this time using Python's regular expressions (note the absence of escape characters):
+
+![Example](https://github.com/benma/visual-regexp-steroids.el/raw/master/screenshots/screenshot0A.png)
+
+visual-regexp-steroids also features expressions as replacements (toggle with `C-c C-c`).
+![Example](https://github.com/benma/visual-regexp-steroids.el/raw/master/screenshots/montage1.png)
+
+Expressions have a predefined variables. `i`, the match counter, is one of them:
+![Example](https://github.com/benma/visual-regexp-steroids.el/raw/master/screenshots/montage2.png)
 
