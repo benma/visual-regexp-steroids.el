@@ -68,8 +68,7 @@ See also: http://docs.python.org/library/re.html#re.I"
 			   (const :tag "Enable the DOTALL modifier by default (dot matches newline)" :S)
 			   (const :tag "Enable the UNICODE modifier by default" :U))
 		:value-type boolean)
-  :group 'visual-regexp
-  )
+  :group 'visual-regexp)
 
 ;;; private variables
 
@@ -222,6 +221,13 @@ and the message line."
     (list replacements message-line)))
 
 :;; prompt
+
+(defadvice vr/minibuffer-help-regexp (around help-regexp activate)
+  (vr--minibuffer-message (format (substitute-command-keys "\\<vr/minibuffer-regexp-keymap>\\[vr--minibuffer-help]: help,%s \\[vr--shortcut-toggle-limit]: toggle show all") (if (vr--regexp-modifiers-enabled) " C-c i: toggle case, C-c m: toggle multiline match of ^ and $, C-c s: toggle dot matches newline," ""))))
+
+(defadvice vr/minibuffer-help-replace (around help-replace activate)
+  (vr--minibuffer-message (format (substitute-command-keys "\\<vr/minibuffer-replace-keymap>\\[vr--minibuffer-help]: help, C-c C-c: toggle expression \\[vr--shortcut-show-matches]: show matches/groups, \\[vr--shortcut-toggle-preview]: toggle preview, \\[vr--shortcut-toggle-limit]: toggle show all"))))
+
 
 (defadvice vr--set-minibuffer-prompt-regexp (around prompt-regexp activate)
   (setq ad-return-value
