@@ -4,7 +4,7 @@
 
 ;; Author: Marko Bencun <mbencun@gmail.com>
 ;; URL: https://github.com/benma/visual-foreign-regexp.el/
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((visual-regexp "0.1"))
 ;; Keywords: external, foreign, regexp, replace, python, visual, feedback
 
@@ -24,6 +24,7 @@
 ;; along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; WHAT'S NEW
+;; 0.2: compatibility with visual-regexp 0.2
 ;; 0.1: initial release
 
 ;;; INTRODUCTION
@@ -190,33 +191,33 @@ The message line is returned.
       (goto-char (point-min))
       (let ((offset vr--target-buffer-start))
 	(cl-loop while (and (vr--not-last-line) (/= (line-beginning-position) (line-end-position))) ;; loop until empty line is reached
-	      for i from 0 do
-	      (cl-loop while (re-search-forward "\\([0-9]+\\) \\([0-9]+\\)" (line-end-position) t) ;; loop integer pairs in line
-		    for j from 0 do
-		    (let ((begin (+ offset (string-to-number (match-string 1))))
-			  (end (+ offset (string-to-number (match-string 2)))))
-		      (funcall callback i j begin end)))
-	      (forward-line 1)))
+		 for i from 0 do
+		 (cl-loop while (re-search-forward "\\([0-9]+\\) \\([0-9]+\\)" (line-end-position) t) ;; loop integer pairs in line
+			  for j from 0 do
+			  (let ((begin (+ offset (string-to-number (match-string 1))))
+				(end (+ offset (string-to-number (match-string 2)))))
+			    (funcall callback i j begin end)))
+		 (forward-line 1)))
       (setq message-line (vr--unescape (vr--current-line))))
     message-line))
 
 (defun vr--parse-replace (s)
   "Parse string s with positions of matches and replacements as returned by external script.
-Returns a list, in reverse order, of (replacement begin end i) (i = index of match = index of corresponding overlay)
+Returns a list, in reverse order, of (replacement (list begin end) i) (i = index of match = index of corresponding overlay)
 and the message line."
-(let ((replacements (list)) ;; store replacements (lines of output) in list
+  (let ((replacements (list)) ;; store replacements (lines of output) in list
 	message-line) ;; store message line (last non-empty line of output)
     (with-temp-buffer
       (insert s)
       (goto-char (point-min))
       (cl-loop while (and (vr--not-last-line) (/= (line-beginning-position) (line-end-position))) ;; loop until empty line is reached
-	    for i from 0 do 
-	    (re-search-forward "\\([0-9]+\\) \\([0-9]+\\) " (line-end-position) t)
-	    (let ((replacement (buffer-substring-no-properties (point) (line-end-position)))
-		  (begin (+ vr--target-buffer-start (string-to-number (match-string 1))))
-		  (end (+ vr--target-buffer-start (string-to-number (match-string 2)))))
-	      (setq replacements (cons (list (vr--unescape replacement) begin end i) replacements)))
-	    (forward-line 1))
+	       for i from 0 do
+	       (re-search-forward "\\([0-9]+\\) \\([0-9]+\\) " (line-end-position) t)
+	       (let ((replacement (buffer-substring-no-properties (point) (line-end-position)))
+		     (begin (+ vr--target-buffer-start (string-to-number (match-string 1))))
+		     (end (+ vr--target-buffer-start (string-to-number (match-string 2)))))
+		 (setq replacements (cons (list (vr--unescape replacement) (list begin end) i) replacements)))
+	       (forward-line 1))
       (setq message-line (vr--unescape (vr--current-line))))
     (list replacements message-line)))
 
@@ -259,8 +260,7 @@ and the message line."
 		   (vr--get-command)
 		   (shell-quote-argument regexp-string)
 		   (when feedback-limit (format "--feedback-limit %s" feedback-limit))
-		   (if forward "" "--backwards")
-		   )
+		   (if forward "" "--backwards"))
 	   (lambda (output)
 	     (vr--parse-matches
 	      output 
@@ -271,17 +271,17 @@ and the message line."
   (if (eq vr/engine 'emacs)
       ad-do-it
     (setq ad-return-value
-	(vr--run-command 
-	 (format "%s replace %s %s %s --regexp %s --replace %s"
-		 (vr--get-command)
-		 (if feedback "--feedback" "")
-		 (if feedback-limit
-		     (format "--feedback-limit %s" feedback-limit)
-		   "")
-		 (if vr--use-expression "--eval" "")
-		 (shell-quote-argument (vr--get-regexp-string))
-		 (shell-quote-argument replace-string))
-	 'vr--parse-replace))))
+	  (vr--run-command
+	   (format "%s replace %s %s %s --regexp %s --replace %s"
+		   (vr--get-command)
+		   (if feedback "--feedback" "")
+		   (if feedback-limit
+		       (format "--feedback-limit %s" feedback-limit)
+		     "")
+		   (if vr--use-expression "--eval" "")
+		   (shell-quote-argument (vr--get-regexp-string))
+		   (shell-quote-argument replace-string))
+	   'vr--parse-replace))))
 
 
 ;; isearch starts here
@@ -298,7 +298,7 @@ and the message line."
   "Like isearch-backward, but using Python (or custom) regular expressions."
   (interactive)
   (if (eq vr/engine 'emacs)
-    (isearch-backward-regexp)  
+      (isearch-backward-regexp)
     (let ((isearch-search-fun-function 'vr--isearch-search-fun-function))
       (isearch-backward-regexp))))
 
