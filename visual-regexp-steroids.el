@@ -3,7 +3,7 @@
 ;; Copyright (C) 2013 Marko Bencun
 
 ;; Author: Marko Bencun <mbencun@gmail.com>
-;; URL: https://github.com/benma/visual-foreign-regexp.el/
+;; URL: https://github.com/benma/visual-regexp-steroids.el/
 ;; Version: 0.2
 ;; Package-Requires: ((visual-regexp "0.1"))
 ;; Keywords: external, foreign, regexp, replace, python, visual, feedback
