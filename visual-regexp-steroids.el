@@ -4,8 +4,8 @@
 
 ;; Author: Marko Bencun <mbencun@gmail.com>
 ;; URL: https://github.com/benma/visual-regexp-steroids.el/
-;; Version: 0.2
-;; Package-Requires: ((visual-regexp "0.1"))
+;; Version: 0.4
+;; Package-Requires: ((visual-regexp "0.4"))
 ;; Keywords: external, foreign, regexp, replace, python, visual, feedback
 
 ;; This file is part of visual-regexp-steroids
@@ -24,6 +24,7 @@
 ;; along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; WHAT'S NEW
+;; 0.4: keep in sync with visual-regexp
 ;; 0.2: compatibility with visual-regexp 0.2
 ;; 0.1: initial release
 
