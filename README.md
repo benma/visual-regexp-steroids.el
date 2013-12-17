@@ -14,6 +14,7 @@ Requirements:
 If you are using Emacs 24, you can get visual-regexp-steroids from [melpa](http://melpa.milkbox.net/) with the package manager.
 
 Add the following code to your init file. Of course you can select your own key bindings.
+Note: `vr/mc-mark` is an interface to [multiple-cursors](https://github.com/magnars/multiple-cursors.el/).
 
 ```Lisp
 ;; if the files are not already in the load path
@@ -22,7 +23,9 @@ Add the following code to your init file. Of course you can select your own key 
 (require 'visual-regexp-steroids)
 (define-key global-map (kbd "C-c r") 'vr/replace)
 (define-key global-map (kbd "C-c q") 'vr/query-replace)
-;; to use visual-regexp's isearch instead of the built-in regexp isearch, also include the following lines:
+;; if you use multiple-cursors, this is for you:
+(define-key global-map (kbd "C-c m") 'vr/mc-mark)
+;; to use visual-regexp-steroids's isearch instead of the built-in regexp isearch, also include the following lines:
 (define-key esc-map (kbd "C-r") 'vr/isearch-backward) ;; C-M-r
 (define-key esc-map (kbd "C-s") 'vr/isearch-forward) ;; C-M-s
 ```
