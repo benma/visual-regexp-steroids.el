@@ -4,8 +4,8 @@
 
 ;; Author: Marko Bencun <mbencun@gmail.com>
 ;; URL: https://github.com/benma/visual-regexp-steroids.el/
-;; Version: 0.4
-;; Package-Requires: ((visual-regexp "0.4"))
+;; Version: 0.5
+;; Package-Requires: ((visual-regexp "0.5"))
 ;; Keywords: external, foreign, regexp, replace, python, visual, feedback
 
 ;; This file is part of visual-regexp-steroids
@@ -24,6 +24,7 @@
 ;; along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; WHAT'S NEW
+;; 0.5: perform no case-conversion for non-emacs regexp engines.
 ;; 0.4: keep in sync with visual-regexp
 ;; 0.2: compatibility with visual-regexp 0.2
 ;; 0.1: initial release
@@ -126,6 +127,10 @@ See also: http://docs.python.org/library/re.html#re.I"
 	(if (string= "" s) "" (format "(?%s)" s)))
     ""))
 
+(defadvice vr--get-replacement (around get-unmodified-replacement (replacement match-data i) activate)
+  (if (eq vr/engine 'emacs)
+      ad-do-it
+    (setq ad-return-value replacement)))
 
 (defadvice vr--get-regexp-string (around get-regexp-string-prefix-modifiers () activate)
   ad-do-it
