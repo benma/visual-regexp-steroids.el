@@ -16,6 +16,9 @@ If you are using Emacs 24, you can get visual-regexp-steroids from [melpa](http:
 Add the following code to your init file. Of course you can select your own key bindings.
 Note: `vr/mc-mark` is an interface to [multiple-cursors](https://github.com/magnars/multiple-cursors.el/).
 
+The functions are the same as in visual-regexp, but powered by Python (or another custom engine).
+You can fall back to the Emacs regexp engine with the `vr/select-replace`, `vr/select-query-replace`, `vr/select-mc-mark`.
+
 ```Lisp
 ;; if the files are not already in the load path
 (add-to-list 'load-path "folder-to/visual-regexp/")
@@ -30,8 +33,6 @@ Note: `vr/mc-mark` is an interface to [multiple-cursors](https://github.com/magn
 (define-key esc-map (kbd "C-s") 'vr/isearch-forward) ;; C-M-s
 ```
 To customize, use `M-x customize-group [RET] visual-regexp`. You can specify how the Python interpreter is invoked by modifying the `vr/command-python` variable. The default is `python /path/to/visual-regexp-steroids/regexp.py`.
-
-
 
 ## Examples
 

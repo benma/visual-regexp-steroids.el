@@ -4,7 +4,7 @@
 
 ;; Author: Marko Bencun <mbencun@gmail.com>
 ;; URL: https://github.com/benma/visual-regexp-steroids.el/
-;; Version: 0.5
+;; Version: 0.6
 ;; Package-Requires: ((visual-regexp "0.5"))
 ;; Keywords: external, foreign, regexp, replace, python, visual, feedback
 
@@ -24,6 +24,7 @@
 ;; along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; WHAT'S NEW
+;; 0.6: new functions vr/select-replace, vr/select-query-replace, vr/select-mc-mark
 ;; 0.5: perform no case-conversion for non-emacs regexp engines.
 ;; 0.4: keep in sync with visual-regexp
 ;; 0.2: compatibility with visual-regexp 0.2
@@ -74,6 +75,8 @@ See also: http://docs.python.org/library/re.html#re.I"
   :group 'visual-regexp)
 
 ;;; private variables
+
+(defconst vr--engines '(emacs python))
 
 (defvar vr--use-expression nil
   "Use expression instead of string in replacement.")
@@ -289,6 +292,31 @@ and the message line."
 		   (shell-quote-argument replace-string))
 	   'vr--parse-replace))))
 
+(defun vr--select-engine ()
+  (let ((default (symbol-name vr/engine))
+	(choices vr--engines))
+    ;; add custom engine if a custom command has been defined
+    (unless (string= "" vr/command-custom)
+	     (setq choices (cons 'custom choices)))
+    (intern (completing-read (format "Select engine (default: %s): " (symbol-name vr/engine)) choices nil t nil nil default))))
+
+;;;###autoload
+(defun vr/select-replace ()
+  (interactive)
+  (let ((vr/engine (vr--select-engine)))
+    (call-interactively 'vr/replace)))
+
+;;;###autoload
+(defun vr/select-query-replace ()
+  (interactive)
+  (let ((vr/engine (vr--select-engine)))
+    (call-interactively 'vr/query-replace)))
+
+;;;###autoload
+(defun vr/select-mc-mark ()
+  (interactive)
+  (let ((vr/engine (vr--select-engine)))
+    (call-interactively 'vr/mc-mark)))
 
 ;; isearch starts here
 
