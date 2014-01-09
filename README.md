@@ -46,3 +46,7 @@ visual-regexp-steroids also features expressions as replacements (toggle with `C
 Expressions have a predefined variables. `i`, the match counter, is one of them:
 ![Example](https://github.com/benma/visual-regexp-steroids.el/raw/master/screenshots/montage2.png)
 
+## Tip Jar
+If you found this useful, please consider donating.
+
+BTC: 1KtDEa5saBdJ2AFcFq93QZ3jz3sYpq2z2

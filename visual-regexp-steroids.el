@@ -30,9 +30,9 @@
 ;; 0.2: compatibility with visual-regexp 0.2
 ;; 0.1: initial release
 
-;;; INTRODUCTION
-;;
-;; What's This?
+;;; Tip Jar
+;; If you found this useful, please consider donating.
+;; BTC: 1KtDEa5saBdJ2AFcFq93QZ3jz3sYpq2z2
 
 ;;; Code:
 
