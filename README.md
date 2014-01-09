@@ -17,7 +17,7 @@ Add the following code to your init file. Of course you can select your own key 
 Note: `vr/mc-mark` is an interface to [multiple-cursors](https://github.com/magnars/multiple-cursors.el/).
 
 The functions are the same as in visual-regexp, but powered by Python (or another custom engine).
-You can fall back to the Emacs regexp engine with the `vr/select-replace`, `vr/select-query-replace`, `vr/select-mc-mark`.
+You can fall back to the Emacs regexp engine with `vr/select-replace`, `vr/select-query-replace` and `vr/select-mc-mark`.
 
 ```Lisp
 ;; if the files are not already in the load path
