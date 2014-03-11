@@ -4,8 +4,8 @@
 
 ;; Author: Marko Bencun <mbencun@gmail.com>
 ;; URL: https://github.com/benma/visual-regexp-steroids.el/
-;; Version: 0.6
-;; Package-Requires: ((visual-regexp "0.5"))
+;; Version: 0.7
+;; Package-Requires: ((visual-regexp "0.6"))
 ;; Keywords: external, foreign, regexp, replace, python, visual, feedback
 
 ;; This file is part of visual-regexp-steroids
@@ -24,6 +24,7 @@
 ;; along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; WHAT'S NEW
+;; 0.7: Distinguish prompts in vr/replace, vr/query-replace, vr/mc-mark.
 ;; 0.6: new functions vr/select-replace, vr/select-query-replace, vr/select-mc-mark
 ;; 0.5: perform no case-conversion for non-emacs regexp engines.
 ;; 0.4: keep in sync with visual-regexp
@@ -240,22 +241,35 @@ and the message line."
 
 
 (defadvice vr--set-minibuffer-prompt-regexp (around prompt-regexp activate)
-  (setq ad-return-value
-	(if (vr--regexp-modifiers-enabled)
-	    (format "Regexp: %s" (vr--get-regexp-modifiers-prefix))
-	  "Regexp: ")))
+  (let (prefix)
+    (setq prefix (cond ((equal vr--calling-func 'vr--calling-func-query-replace)
+			"Query regexp: ")
+		       ((equal vr--calling-func 'vr--calling-func-mc-mark)
+			"Mark regexp: ")
+		       (t
+			"Regexp: ")))
+    (setq ad-return-value
+	  (if (vr--regexp-modifiers-enabled)
+	      (format "%s%s" prefix (vr--get-regexp-modifiers-prefix))
+	    prefix))))
 
 (defadvice vr--set-minibuffer-prompt-replace (around prompt-replace activate)
-  (setq ad-return-value
-	(concat "Replace"
-		(let ((flag-infos (mapconcat 'identity 
-					     (delq nil (list (when vr--use-expression "using expression")
-							     (when vr--replace-preview "preview"))) 
-					     ", ")))
-		  (when (not (string= "" flag-infos ))
-		    (format " (%s)" flag-infos)))
-		(format " (%s)" (vr--get-regexp-string))
-		": ")))
+  (let (prefix)
+    (setq prefix (cond ((equal vr--calling-func 'vr--calling-func-query-replace)
+			"Query replace")
+		       (t
+			"Replace")))
+    
+    (setq ad-return-value
+	  (concat prefix
+		  (let ((flag-infos (mapconcat 'identity 
+					       (delq nil (list (when vr--use-expression "using expression")
+							       (when vr--replace-preview "preview"))) 
+					       ", ")))
+		    (when (not (string= "" flag-infos ))
+		      (format " (%s)" flag-infos)))
+		  (format " (%s)" (vr--get-regexp-string))
+		  ": "))))
 
 ;; feedback / replace functions
 
