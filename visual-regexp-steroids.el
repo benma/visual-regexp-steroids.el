@@ -24,7 +24,7 @@
 ;; along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; WHAT'S NEW
-;; 0.7: Distinguish prompts in vr/replace, vr/query-replace, vr/mc-mark.
+;; 0.7: distinguish prompts in vr/replace, vr/query-replace, vr/mc-mark.
 ;; 0.6: new functions vr/select-replace, vr/select-query-replace, vr/select-mc-mark
 ;; 0.5: perform no case-conversion for non-emacs regexp engines.
 ;; 0.4: keep in sync with visual-regexp
@@ -41,7 +41,10 @@
 
 ;;; variables
 
-(defcustom vr/command-python (format "python %s" (expand-file-name "regexp.py" (file-name-directory load-file-name)))
+(defvar vr--command-python-default
+  (format "python %s" (expand-file-name "regexp.py" (file-name-directory load-file-name))))
+
+(defcustom vr/command-python vr--command-python-default
   "External command used for the Python engine."
   :type 'string
   :group 'visual-regexp)
