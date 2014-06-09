@@ -271,8 +271,8 @@ and the message line."
 					       ", ")))
 		    (when (not (string= "" flag-infos ))
 		      (format " (%s)" flag-infos)))
-		  (format " (%s)" (vr--get-regexp-string))
-		  ": "))))
+		  (format " %s" (vr--get-regexp-string))
+		  " with: "))))
 
 ;; feedback / replace functions
 
