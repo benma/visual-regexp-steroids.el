@@ -390,8 +390,9 @@ and the message line."
   (let* ((is-called-from-lazy-highlighting bound) ;; we assume only lazy highlighting sets a bound. isearch does not, and neither does our own vr/query-replace.
 	 matches-vec ;; stores matches from regexp.py
 	 message-line ;; message from regexp.py
-	 (regexp string ;; (if case-fold-search (concat "(?i)" string) string)
-		 )
+	 (regexp
+          ;; use the default modifiers in isearch mode
+          (concat (vr--get-regexp-modifiers-prefix) string))
 	 (start
 	  (if forward 
 	      (if is-called-from-lazy-highlighting (window-start (selected-window)) (point))
