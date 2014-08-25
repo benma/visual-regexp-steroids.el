@@ -59,6 +59,7 @@
   "Which engine to use for searching/replacing.
 Use Emacs to use Emacs-style regular expressions.
 Use Python to use Python's regular expressions (see vr/command-python).
+Use pcre2el (https://github.com/joddie/pcre2el) to use PCRE regular expressions.
 Use Custom to use a custom external command (see vr/command-custom)."
   :type '(choice
           (const :tag "Emacs" emacs)
