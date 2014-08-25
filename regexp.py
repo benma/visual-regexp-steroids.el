@@ -72,7 +72,7 @@ if argv[1] == 'matches':
             if feedback_limit is not None and i >= feedback_limit:
                 break
             # show only if match length is nonzero
-            #if match.start() != match.end(): 
+            #if match.start() != match.end():
             sys.stdout.write(' '.join("%s %s" % span for span in match.regs))
             sys.stdout.write('\n')
         if matches:
@@ -106,25 +106,25 @@ elif argv[1] == "replace":
             'm': match,
             'i': match_counter[0],
             }
-        
+
         if do_eval:
             replacement = (str if PY3 else unicode)(eval(replace, _globals, _locals))
         else:
             replacement = match.expand(replace)
-        # output one replacement per line 
+        # output one replacement per line
         #if not feedback or match.start() != match.end():
         sys.stdout.write("%s %s " % match.span())
         sys.stdout.write(escape(replacement))
         sys.stdout.write('\n')
-        
+
         match_counter[0] += 1
-        
+
         # return does not really matter, we are using re.sub only to have a callback on each match.
         return match.group(0)
 
     try:
         # call eval_replace on each match.
-        # we cannot loop through and replace matches one by one (regexp replacing match.group(0))  because zero-width patterns (i.e. "(A(?=B))") 
+        # we cannot loop through and replace matches one by one (regexp replacing match.group(0))  because zero-width patterns (i.e. "(A(?=B))")
         # are not part of match.group(0) and the regexp would not match again.
         re.sub(regexp, eval_replace, region, count=feedback_limit if feedback and feedback_limit else 0)
         # this line is only for counting matches

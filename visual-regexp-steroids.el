@@ -56,13 +56,13 @@
   :group 'visual-regexp)
 
 (defcustom vr/engine 'python
-  "Which engine to use for searching/replacing. 
+  "Which engine to use for searching/replacing.
 Use Emacs to use Emacs-style regular expressions.
 Use Python to use Python's regular expressions (see vr/command-python).
 Use Custom to use a custom external command (see vr/command-custom)."
   :type '(choice
-	  (const :tag "Emacs" emacs) 
-	  (const :tag "pcre2el" pcre2el) 
+	  (const :tag "Emacs" emacs)
+	  (const :tag "pcre2el" pcre2el)
 	  (const :tag "Python" python)
 	  (const :tag "Custom" custom))
   :group 'visual-regexp)
@@ -73,7 +73,7 @@ See also: http://docs.python.org/library/re.html#re.I"
   ;;:type '(choice (const 10) (const 5))
 
   :type '(plist :key-type (choice
-			   (const :tag "Enable the IGNORECASE modifier by default" :I) 
+			   (const :tag "Enable the IGNORECASE modifier by default" :I)
 			   (const :tag "Enable the MULTILINE modifier by default (^ and $ match on every line)" :M)
 			   (const :tag "Enable the DOTALL modifier by default (dot matches newline)" :S)
 			   (const :tag "Enable the UNICODE modifier by default" :U))
@@ -115,7 +115,7 @@ See also: http://docs.python.org/library/re.html#re.I"
 (defun vr--toggle-regexp-modifier (modifier)
   "modifier should be one of :I, :M, :S, :U."
   (when (vr--regexp-modifiers-enabled)
-    (plist-put vr--regexp-modifiers modifier 
+    (plist-put vr--regexp-modifiers modifier
 	       (not (plist-get vr--regexp-modifiers modifier)))
     (vr--update-minibuffer-prompt)
     (vr--feedback)))
@@ -123,7 +123,7 @@ See also: http://docs.python.org/library/re.html#re.I"
 (defun vr--get-regexp-modifiers-prefix ()
   "Construct (?imsu) prefix based on selected modifiers."
   (if (vr--regexp-modifiers-enabled)
-      (let ((s (mapconcat 'identity 
+      (let ((s (mapconcat 'identity
 			  (delq nil (mapcar (lambda (m)
 					      (when (plist-get vr--regexp-modifiers m)
 						(cond ((equal m :I) "i")
@@ -149,9 +149,9 @@ See also: http://docs.python.org/library/re.html#re.I"
 	  (setq regexp (pcre-to-elisp regexp))
       (invalid-regexp (signal (car err) (cdr err))) ;; rethrow
       (error (signal (car err) (list "pcre2el error")))))
-    
+
     (setq ad-return-value
-	  (concat (vr--get-regexp-modifiers-prefix) 
+	  (concat (vr--get-regexp-modifiers-prefix)
 		  regexp))))
 
 ;;; shell command / parsing functions
@@ -182,7 +182,7 @@ See also: http://docs.python.org/library/re.html#re.I"
 
 (defun vr--run-command (args success)
   (cl-multiple-value-bind (output exit-code) (vr--command args)
-    (cond ((equal exit-code 0) 
+    (cond ((equal exit-code 0)
 	   (funcall success output))
 	  ((equal exit-code 1)
 	   (message "script failed:%s\n" output))
@@ -194,7 +194,7 @@ Escaped newlines are only unescaped if newline is not nil."
   (setq s (replace-regexp-in-string (regexp-quote "\\n") (regexp-quote "\n") s))
   (replace-regexp-in-string (regexp-quote "\\\\") (regexp-quote "\\") s))
 
-(defun vr--not-last-line () 
+(defun vr--not-last-line ()
   "Output of external script ends in one line of message and one empty line.
 Return t if current line is not the line with the message."
   (save-excursion (= 0 (forward-line 2))))
@@ -271,12 +271,12 @@ and the message line."
 			"Query replace")
 		       (t
 			"Replace")))
-    
+
     (setq ad-return-value
 	  (concat prefix
-		  (let ((flag-infos (mapconcat 'identity 
+		  (let ((flag-infos (mapconcat 'identity
 					       (delq nil (list (when vr--use-expression "using expression")
-							       (when vr--replace-preview "preview"))) 
+							       (when vr--replace-preview "preview")))
 					       ", ")))
 		    (when (not (string= "" flag-infos ))
 		      (format " (%s)" flag-infos)))
@@ -290,7 +290,7 @@ and the message line."
   (if (member vr/engine '(emacs pcre2el))
       ad-do-it
     (setq ad-return-value
-	  (vr--run-command 
+	  (vr--run-command
 	   (format "%s matches --regexp %s %s %s"
 		   (vr--get-command)
 		   (shell-quote-argument regexp-string)
@@ -298,7 +298,7 @@ and the message line."
 		   (if forward "" "--backwards"))
 	   (lambda (output)
 	     (vr--parse-matches
-	      output 
+	      output
 	      callback))))))
 
 (defadvice vr--get-replacements (around get-replacements-around (feedback feedback-limit) activate)
@@ -401,7 +401,7 @@ and the message line."
 	 message-line ;; message from regexp.py
 	 (regexp (if (eq vr/engine 'pcre2el) (pcre-to-elisp string) string))
 	 (start
-	  (if forward 
+	  (if forward
 	      (if is-called-from-lazy-highlighting (window-start (selected-window)) (point))
 	    (if is-called-from-lazy-highlighting bound (point-min))))
 	 (end
@@ -445,16 +445,16 @@ and the message line."
 	(when is-called-from-lazy-highlighting ;; store in cache
 	  (setq vr--isearch-cache-key cache-key
 		vr--isearch-cache-val matches-vec))))
-    
+
     (let ((match (vr--isearch-find-match matches-vec (point))))
       (if match
 	  (progn
-	    (set-match-data (mapcar 'copy-marker match)) ;; needed for isearch 
+	    (set-match-data (mapcar 'copy-marker match)) ;; needed for isearch
 	    (if forward
 		(goto-char (nth 1 match)) ;; move to end of match
 	      (goto-char (nth 0 match)) ;; move to beginning of match
 	      ))
-	(progn 
+	(progn
 	  (set-match-data (list 0 0))
 	  (when (string= "Invalid:" (substring message-line 0 8))
 	    (signal 'invalid-regexp (list message-line))))))))
