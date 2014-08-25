@@ -3,7 +3,7 @@
 visual-regexp-steroids is an extension to [visual-regexp](https://github.com/benma/visual-regexp.el) which enables the use of modern regexp engines (no more escaped group parentheses, and other goodies!).
 In addition to that, you can optionally use the better regexp syntax to power `isearch-forward-regexp` and `isearch-backward-regexp`.
 
-For now, Python is supported out of the box (tested on Linux and Windows). If you want to add custom scripts to enable your favorite language, please get in touch.
+For now, Python and [pcre2el](https://github.com/joddie/pcre2el) is supported out of the box (tested on Linux and Windows). If you want to add custom scripts to enable your favorite language, please get in touch.
 
 ## Installation
 

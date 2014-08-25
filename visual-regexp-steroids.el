@@ -4,8 +4,8 @@
 
 ;; Author: Marko Bencun <mbencun@gmail.com>
 ;; URL: https://github.com/benma/visual-regexp-steroids.el/
-;; Version: 0.7
-;; Package-Requires: ((visual-regexp "0.6"))
+;; Version: 0.8
+;; Package-Requires: ((visual-regexp "0.8"))
 ;; Keywords: external, foreign, regexp, replace, python, visual, feedback
 
 ;; This file is part of visual-regexp-steroids
@@ -24,6 +24,7 @@
 ;; along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; WHAT'S NEW
+;; 0.8: Added support for pcre2el as a new engine.
 ;; 0.7: distinguish prompts in vr/replace, vr/query-replace, vr/mc-mark.
 ;; 0.6: new functions vr/select-replace, vr/select-query-replace, vr/select-mc-mark
 ;; 0.5: perform no case-conversion for non-emacs regexp engines.
@@ -61,6 +62,7 @@ Use Python to use Python's regular expressions (see vr/command-python).
 Use Custom to use a custom external command (see vr/command-custom)."
   :type '(choice
 	  (const :tag "Emacs" emacs) 
+	  (const :tag "pcre2el" pcre2el) 
 	  (const :tag "Python" python)
 	  (const :tag "Custom" custom))
   :group 'visual-regexp)
@@ -80,7 +82,7 @@ See also: http://docs.python.org/library/re.html#re.I"
 
 ;;; private variables
 
-(defconst vr--engines '(emacs python))
+(defconst vr--engines '(emacs pcre2el python))
 
 (defvar vr--use-expression nil
   "Use expression instead of string in replacement.")
@@ -135,15 +137,22 @@ See also: http://docs.python.org/library/re.html#re.I"
     ""))
 
 (defadvice vr--get-replacement (around get-unmodified-replacement (replacement match-data i) activate)
-  (if (eq vr/engine 'emacs)
+  (if (member vr/engine '(emacs pcre2el))
       ad-do-it
     (setq ad-return-value replacement)))
 
-(defadvice vr--get-regexp-string (around get-regexp-string-prefix-modifiers () activate)
+(defadvice vr--get-regexp-string (around get-regexp-string (&optional for-display) activate)
   ad-do-it
-  (setq ad-return-value
-	(concat (vr--get-regexp-modifiers-prefix) 
-		ad-return-value)))
+  (let ((regexp ad-return-value))
+    (when (and (not for-display) (eq vr/engine 'pcre2el))
+      (condition-case err
+	  (setq regexp (pcre-to-elisp regexp))
+      (invalid-regexp (signal (car err) (cdr err))) ;; rethrow
+      (error (signal (car err) (list "pcre2el error")))))
+    
+    (setq ad-return-value
+	  (concat (vr--get-regexp-modifiers-prefix) 
+		  regexp))))
 
 ;;; shell command / parsing functions
 
@@ -271,14 +280,14 @@ and the message line."
 					       ", ")))
 		    (when (not (string= "" flag-infos ))
 		      (format " (%s)" flag-infos)))
-		  (format " %s" (vr--get-regexp-string))
+		  (format " %s" (vr--get-regexp-string t))
 		  " with: "))))
 
 ;; feedback / replace functions
 
 (defadvice vr--feedback-function (around feedback-around (forward feedback-limit callback) activate)
   "Feedback function for search using an external command."
-  (if (eq vr/engine 'emacs)
+  (if (member vr/engine '(emacs pcre2el))
       ad-do-it
     (setq ad-return-value
 	  (vr--run-command 
@@ -294,7 +303,7 @@ and the message line."
 
 (defadvice vr--get-replacements (around get-replacements-around (feedback feedback-limit) activate)
   "Get replacements using an external command."
-  (if (eq vr/engine 'emacs)
+  (if (member vr/engine '(emacs pcre2el))
       ad-do-it
     (setq ad-return-value
 	  (vr--run-command
@@ -315,7 +324,7 @@ and the message line."
     ;; add custom engine if a custom command has been defined
     (unless (string= "" vr/command-custom)
 	     (setq choices (cons 'custom choices)))
-    (intern (completing-read (format "Select engine (default: %s): " (symbol-name vr/engine)) choices nil t nil nil default))))
+    (intern (completing-read (format "Select engine (default: %s): " (symbol-name vr/engine)) (mapcar 'symbol-name choices) nil t nil nil default))))
 
 ;;;###autoload
 (defun vr/select-replace ()
