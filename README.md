@@ -17,7 +17,7 @@ Add the following code to your init file. Of course you can select your own key 
 Note: `vr/mc-mark` is an interface to [multiple-cursors](https://github.com/magnars/multiple-cursors.el/).
 
 The functions are the same as in visual-regexp, but powered by Python (or another custom engine).
-You can fall back to the Emacs regexp engine with `vr/select-replace`, `vr/select-query-replace` and `vr/select-mc-mark`.
+You can choose the engine (e.g. to fall back to the Emacs regexp engine) with `vr/select-replace`, `vr/select-query-replace` and `vr/select-mc-mark`.
 
 ```Lisp
 ;; if the files are not already in the load path
@@ -32,7 +32,7 @@ You can fall back to the Emacs regexp engine with `vr/select-replace`, `vr/selec
 (define-key esc-map (kbd "C-r") 'vr/isearch-backward) ;; C-M-r
 (define-key esc-map (kbd "C-s") 'vr/isearch-forward) ;; C-M-s
 ```
-To customize, use `M-x customize-group [RET] visual-regexp`. You can specify how the Python interpreter is invoked by modifying the `vr/command-python` variable. The default is `python /path/to/visual-regexp-steroids/regexp.py`.
+To customize, use `M-x customize-group [RET] visual-regexp`. You can specify which engine to use by modifying `vr/engine` (defaults to Python), and how the Python interpreter is invoked by modifying the `vr/command-python` variable. The default is `python /path/to/visual-regexp-steroids/regexp.py`.
 
 ## Examples
 
