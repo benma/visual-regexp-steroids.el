@@ -347,6 +347,7 @@ and the message line."
 
 ;; isearch starts here
 
+;;;###autoload
 (defun vr/isearch-forward ()
   "Like isearch-forward, but using Python (or custom) regular expressions."
   (interactive)
@@ -355,6 +356,7 @@ and the message line."
     (let ((isearch-search-fun-function 'vr--isearch-search-fun-function))
       (isearch-forward-regexp))))
 
+;;;###autoload
 (defun vr/isearch-backward ()
   "Like isearch-backward, but using Python (or custom) regular expressions."
   (interactive)
