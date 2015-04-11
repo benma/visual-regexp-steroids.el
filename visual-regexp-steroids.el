@@ -189,11 +189,9 @@ See also: http://docs.python.org/library/re.html#re.I"
            (message "script failed:%s\n" output))
           (t (error (format "External command failed with exit code %s" exit-code))))))
 
-(defun vr--unescape (s) ;; todo: should not be needed here
-  "Replacement strings returned by external script have escaped newlines and backslashes (so that there can be one replacement per line). Unescape to get back original.
-Escaped newlines are only unescaped if newline is not nil."
-  (setq s (replace-regexp-in-string (regexp-quote "\\n") (regexp-quote "\n") s))
-  (replace-regexp-in-string (regexp-quote "\\\\") (regexp-quote "\\") s))
+(defun vr--unescape (s)
+  "Replacement/message strings returned by external script are base64 encoded."
+  (decode-coding-string (base64-decode-string s) 'utf-8 t))
 
 (defun vr--not-last-line ()
   "Output of external script ends in one line of message and one empty line.

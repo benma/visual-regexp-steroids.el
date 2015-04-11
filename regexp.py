@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, re
+import sys, re, base64
 
 # True if we are running on Python 3.
 PY3 = sys.version_info[0] == 3
@@ -48,7 +48,7 @@ def parse_arg(arg, required=True):
     raise Exception("Unrecognized argument: %s" % arg)
 
 def escape(s):
-    return s.replace('\\','\\\\').replace('\n', '\\n')
+    return base64.b64encode(s.encode('utf8')).decode('utf8')
 
 def message(msg):
     sys.stdout.write(escape(msg))
