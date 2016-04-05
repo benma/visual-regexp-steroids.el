@@ -43,7 +43,7 @@
 ;;; variables
 
 (defvar vr--command-python-default
-  (format "python %s" (expand-file-name "regexp.py" (file-name-directory load-file-name))))
+  (format "python \"%s\"" (expand-file-name "regexp.py" (file-name-directory load-file-name))))
 
 (defcustom vr/command-python vr--command-python-default
   "External command used for the Python engine."
@@ -293,7 +293,9 @@ and the message line."
            (format "%s matches --regexp %s %s %s"
                    (vr--get-command)
                    (shell-quote-argument regexp-string)
-                   (when feedback-limit (format "--feedback-limit %s" feedback-limit))
+                   (if feedback-limit 
+                       (format "--feedback-limit %s" feedback-limit)
+                       "")
                    (if forward "" "--backwards"))
            (lambda (output)
              (vr--parse-matches
