@@ -1,11 +1,11 @@
 ;;; visual-regexp-steroids.el --- Extends visual-regexp to support other regexp engines
 
-;; Copyright (C) 2013-2015 Marko Bencun
+;; Copyright (C) 2013-2016 Marko Bencun
 
 ;; Author: Marko Bencun <mbencun@gmail.com>
 ;; URL: https://github.com/benma/visual-regexp-steroids.el/
 ;; Version: 0.8
-;; Package-Requires: ((visual-regexp "0.8"))
+;; Package-Requires: ((visual-regexp "0.9"))
 ;; Keywords: external, foreign, regexp, replace, python, visual, feedback
 
 ;; This file is part of visual-regexp-steroids
@@ -24,6 +24,7 @@
 ;; along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; WHAT'S NEW
+;; 0.9: Fix warnings regarding free variables.
 ;; 0.8: Added support for pcre2el as a new engine.
 ;; 0.7: distinguish prompts in vr/replace, vr/query-replace, vr/mc-mark.
 ;; 0.6: new functions vr/select-replace, vr/select-query-replace, vr/select-mc-mark
@@ -284,7 +285,7 @@ and the message line."
 
 ;; feedback / replace functions
 
-(defadvice vr--feedback-function (around feedback-around (forward feedback-limit callback) activate)
+(defadvice vr--feedback-function (around feedback-around (regexp-string forward feedback-limit callback) activate)
   "Feedback function for search using an external command."
   (if (member vr/engine '(emacs pcre2el))
       ad-do-it
@@ -300,7 +301,7 @@ and the message line."
               output
               callback))))))
 
-(defadvice vr--get-replacements (around get-replacements-around (feedback feedback-limit) activate)
+(defadvice vr--get-replacements (around get-replacements-around (replace-string feedback feedback-limit) activate)
   "Get replacements using an external command."
   (if (member vr/engine '(emacs pcre2el))
       ad-do-it
@@ -372,12 +373,12 @@ and the message line."
 (defun vr--isearch-backward (string &optional bound noerror count)
   (vr--isearch nil string bound noerror count))
 
-(defun vr--isearch-find-match (matches start)
-  (let ((i (vr--isearch-find-match-bsearch matches start 0 (- (length matches) 1))))
+(defun vr--isearch-find-match (forward matches start)
+  (let ((i (vr--isearch-find-match-bsearch forward matches start 0 (- (length matches) 1))))
     (unless (eq i -1)
       (aref matches i))))
 
-(defun vr--isearch-find-match-bsearch (matches start left right)
+(defun vr--isearch-find-match-bsearch (forward matches start left right)
   (if (= 0 (length matches))
       -1
     (let ((mid (/ (+ left right) 2))
@@ -389,9 +390,9 @@ and the message line."
                -1)
              )
             ((funcall cmp start (nth el (aref matches mid)))
-             (vr--isearch-find-match-bsearch matches start left mid))
+             (vr--isearch-find-match-bsearch forward matches start left mid))
             (t
-             (vr--isearch-find-match-bsearch matches start (1+ mid) right))))))
+             (vr--isearch-find-match-bsearch forward matches start (1+ mid) right))))))
 
 (defun vr--isearch (forward string &optional bound noerror count)
   ;; This is be called from isearch. In the first call, bound will be nil to find the next match.
@@ -420,16 +421,16 @@ and the message line."
         (let ((matches-list (list))
               (number-of-matches 0))
           (setq message-line
-                (let ((regexp-string regexp))
-                  (vr--feedback-function
-                   forward
-                   (if count
-                       count
-                     ;; if no bound, the rest of the buffer is searched for the first match -> need only one match
-                     (if bound nil 1))
-                   (lambda (i j begin end)
-                     (when (= j 0) (setq number-of-matches (1+ number-of-matches)))
-                     (setq matches-list (cons (list i j begin end) matches-list))))))
+                (vr--feedback-function
+                 regexp
+                 forward
+                 (if count
+                     count
+                   ;; if no bound, the rest of the buffer is searched for the first match -> need only one match
+                   (if bound nil 1))
+                 (lambda (i j begin end)
+                   (when (= j 0) (setq number-of-matches (1+ number-of-matches)))
+                   (setq matches-list (cons (list i j begin end) matches-list)))))
 
           ;; convert list to vector
           (setq matches-vec (make-vector number-of-matches nil))
@@ -447,7 +448,7 @@ and the message line."
           (setq vr--isearch-cache-key cache-key
                 vr--isearch-cache-val matches-vec))))
 
-    (let ((match (vr--isearch-find-match matches-vec (point))))
+    (let ((match (vr--isearch-find-match forward matches-vec (point))))
       (if match
           (progn
             (set-match-data (mapcar 'copy-marker match)) ;; needed for isearch
