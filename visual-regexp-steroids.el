@@ -4,8 +4,8 @@
 
 ;; Author: Marko Bencun <mbencun@gmail.com>
 ;; URL: https://github.com/benma/visual-regexp-steroids.el/
-;; Version: 0.8
-;; Package-Requires: ((visual-regexp "0.9"))
+;; Version: 1.0
+;; Package-Requires: ((visual-regexp "1.0"))
 ;; Keywords: external, foreign, regexp, replace, python, visual, feedback
 
 ;; This file is part of visual-regexp-steroids
@@ -24,6 +24,7 @@
 ;; along with visual-regexp-steroids.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; WHAT'S NEW
+;; 1.0: Make compatible with visual-regexp 1.0.
 ;; 0.9: Fix warnings regarding free variables.
 ;; 0.8: Added support for pcre2el as a new engine.
 ;; 0.7: distinguish prompts in vr/replace, vr/query-replace, vr/mc-mark.
@@ -93,16 +94,16 @@ See also: http://docs.python.org/library/re.html#re.I"
 (defvar vr--regexp-modifiers '()
   "Modifiers in use.")
 
-(define-key vr/minibuffer-regexp-keymap (kbd "C-c i") (lambda () (interactive) (vr--toggle-regexp-modifier :I)))
-(define-key vr/minibuffer-regexp-keymap (kbd "C-c m") (lambda () (interactive) (vr--toggle-regexp-modifier :M)))
-(define-key vr/minibuffer-regexp-keymap (kbd "C-c s") (lambda () (interactive) (vr--toggle-regexp-modifier :S)))
-(define-key vr/minibuffer-regexp-keymap (kbd "C-c u") (lambda () (interactive) (vr--toggle-regexp-modifier :U)))
+(define-key vr/minibuffer-keymap (kbd "C-c i") (lambda () (interactive) (vr--toggle-regexp-modifier :I)))
+(define-key vr/minibuffer-keymap (kbd "C-c m") (lambda () (interactive) (vr--toggle-regexp-modifier :M)))
+(define-key vr/minibuffer-keymap (kbd "C-c s") (lambda () (interactive) (vr--toggle-regexp-modifier :S)))
+(define-key vr/minibuffer-keymap (kbd "C-c u") (lambda () (interactive) (vr--toggle-regexp-modifier :U)))
 
-(define-key vr/minibuffer-replace-keymap (kbd "C-c C-c") (lambda () (interactive)
-                                                           (when (equal vr--in-minibuffer 'vr--minibuffer-replace)
-                                                             (setq vr--use-expression (not vr--use-expression))
-                                                             (vr--update-minibuffer-prompt)
-                                                             (vr--do-replace-feedback))))
+(define-key vr/minibuffer-keymap (kbd "C-c C-c") (lambda () (interactive)
+                                                   (when (vr--in-replace)
+                                                     (setq vr--use-expression (not vr--use-expression))
+                                                     (vr--update-minibuffer-prompt)
+                                                     (vr--do-replace-feedback))))
 
 
 ;;; regexp modifiers
@@ -116,11 +117,11 @@ See also: http://docs.python.org/library/re.html#re.I"
 
 (defun vr--toggle-regexp-modifier (modifier)
   "modifier should be one of :I, :M, :S, :U."
-  (when (vr--regexp-modifiers-enabled)
+  (when (and (vr--in-from) (vr--regexp-modifiers-enabled))
     (plist-put vr--regexp-modifiers modifier
                (not (plist-get vr--regexp-modifiers modifier)))
     (vr--update-minibuffer-prompt)
-    (vr--feedback)))
+    (vr--show-feedback)))
 
 (defun vr--get-regexp-modifiers-prefix ()
   "Construct (?imsu) prefix based on selected modifiers."
@@ -245,43 +246,36 @@ and the message line."
 
 :;; prompt
 
-(defadvice vr/minibuffer-help-regexp (around help-regexp activate)
-  (vr--minibuffer-message (format (substitute-command-keys "\\<vr/minibuffer-regexp-keymap>\\[vr--minibuffer-help]: help,%s \\[vr--shortcut-toggle-limit]: toggle show all") (if (vr--regexp-modifiers-enabled) " C-c i: toggle case, C-c m: toggle multiline match of ^ and $, C-c s: toggle dot matches newline," ""))))
+(defadvice vr--set-minibuffer-prompt (around prompt activate)
+  (let ((prompt (cond ((equal vr--calling-func 'vr--calling-func-query-replace)
+                       "Query replace")
+                      ((equal vr--calling-func 'vr--calling-func-mc-mark)
+                       "Mark")
+                      (t
+                       "Replace"))))
+    (when (vr--in-replace)
+      (setq prompt (concat prompt
+                           (let ((flag-infos (mapconcat 'identity
+                                                        (delq nil (list (when vr--use-expression "using expression")
+                                                                        (when vr--replace-preview "preview")))
+                                                        ", ")))
+                             (when (not (string= "" flag-infos ))
+                               (format " (%s)" flag-infos))))))
+    (when (not (vr--in-from))
+      (setq prompt (concat prompt " " (vr--get-regexp-string t))))
+    (setq prompt (concat prompt (if (vr--in-from) ": " " with: ")))
+    (when (and (vr--in-from) (vr--regexp-modifiers-enabled))
+      (setq prompt (concat prompt (vr--get-regexp-modifiers-prefix))))
+    (setq ad-return-value prompt)))
 
-(defadvice vr/minibuffer-help-replace (around help-replace activate)
-  (vr--minibuffer-message (format (substitute-command-keys "\\<vr/minibuffer-replace-keymap>\\[vr--minibuffer-help]: help, C-c C-c: toggle expression \\[vr--shortcut-show-matches]: show matches/groups, \\[vr--shortcut-toggle-preview]: toggle preview, \\[vr--shortcut-toggle-limit]: toggle show all"))))
-
-
-(defadvice vr--set-minibuffer-prompt-regexp (around prompt-regexp activate)
-  (let (prefix)
-    (setq prefix (cond ((equal vr--calling-func 'vr--calling-func-query-replace)
-                        "Query regexp: ")
-                       ((equal vr--calling-func 'vr--calling-func-mc-mark)
-                        "Mark regexp: ")
-                       (t
-                        "Regexp: ")))
-    (setq ad-return-value
-          (if (vr--regexp-modifiers-enabled)
-              (format "%s%s" prefix (vr--get-regexp-modifiers-prefix))
-            prefix))))
-
-(defadvice vr--set-minibuffer-prompt-replace (around prompt-replace activate)
-  (let (prefix)
-    (setq prefix (cond ((equal vr--calling-func 'vr--calling-func-query-replace)
-                        "Query replace")
-                       (t
-                        "Replace")))
-
-    (setq ad-return-value
-          (concat prefix
-                  (let ((flag-infos (mapconcat 'identity
-                                               (delq nil (list (when vr--use-expression "using expression")
-                                                               (when vr--replace-preview "preview")))
-                                               ", ")))
-                    (when (not (string= "" flag-infos ))
-                      (format " (%s)" flag-infos)))
-                  (format " %s" (vr--get-regexp-string t))
-                  " with: "))))
+(defadvice vr--minibuffer-help-text (around help activate)
+  ad-do-it
+  (let ((help ad-return-value))
+    (when (and (vr--in-from) (vr--regexp-modifiers-enabled))
+      (setq help (concat help ", C-c i: toggle case, C-c m: toggle multiline match of ^ and $, C-c s: toggle dot matches newline")))
+    (when (vr--in-replace)
+      (setq help (concat help ", C-c C-c: toggle expression")))
+    (setq ad-return-value help)))
 
 ;; feedback / replace functions
 
@@ -301,7 +295,7 @@ and the message line."
               output
               callback))))))
 
-(defadvice vr--get-replacements (around get-replacements-around (replace-string feedback feedback-limit) activate)
+(defadvice vr--get-replacements (around get-replacements-around (feedback feedback-limit) activate)
   "Get replacements using an external command."
   (if (member vr/engine '(emacs pcre2el))
       ad-do-it
@@ -315,7 +309,7 @@ and the message line."
                      "")
                    (if vr--use-expression "--eval" "")
                    (shell-quote-argument (vr--get-regexp-string))
-                   (shell-quote-argument replace-string))
+                   (shell-quote-argument (vr--get-replace-string)))
            'vr--parse-replace))))
 
 (defun vr--select-engine ()
@@ -470,8 +464,8 @@ and the message line."
       (isearch-search-fun))))
 
 (add-hook 'isearch-mode-end-hook (lambda ()
-           (setq vr--isearch-cache-key nil
-           vr--isearch-cache-val nil)))
+                                   (setq vr--isearch-cache-key nil
+                                         vr--isearch-cache-val nil)))
 
 (provide 'visual-regexp-steroids)
 
