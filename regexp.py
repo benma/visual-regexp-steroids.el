@@ -22,8 +22,8 @@ PY3 = sys.version_info[0] == 3
 
 if not PY3:
     import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
-    sys.stdin = codecs.getreader('utf-8')(sys.stdin)
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout, "ignore")
+    sys.stdin = codecs.getreader('utf-8')(sys.stdin, "ignore")
 
 argv = sys.argv
 
@@ -48,7 +48,7 @@ def parse_arg(arg, required=True):
     raise Exception("Unrecognized argument: %s" % arg)
 
 def escape(s):
-    return base64.b64encode(s.encode('utf8')).decode('utf8')
+    return base64.b64encode(s.encode('utf8', "ignore")).decode('utf8', "ignore")
 
 def message(msg):
     sys.stdout.write(escape(msg))
@@ -61,7 +61,7 @@ if argv[1] == 'matches':
     region = sys.stdin.read()
 
     if not PY3:
-        regexp = regexp.decode('utf-8')
+        regexp = regexp.decode('utf-8', "ignore")
 
     feedback_limit = parse_arg('--feedback-limit', required=False)
     try:
@@ -91,8 +91,8 @@ elif argv[1] == "replace":
     region = sys.stdin.read()
 
     if not PY3:
-        regexp = regexp.decode('utf-8')
-        replace = replace.decode('utf-8')
+        regexp = regexp.decode('utf-8', "ignore")
+        replace = replace.decode('utf-8', "ignore")
 
     if do_eval:
         # use \1, \2 instead of m.group(0), m.group(1), ...
