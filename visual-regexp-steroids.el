@@ -46,7 +46,7 @@
 ;;; variables
 
 (defvar vr--command-python-default
-  (format "python %s" (expand-file-name "regexp.py" (file-name-directory load-file-name))))
+  (format "python \"%s\"" (expand-file-name "regexp.py" (file-name-directory load-file-name))))
 
 (defcustom vr/command-python vr--command-python-default
   "External command used for the Python engine."
