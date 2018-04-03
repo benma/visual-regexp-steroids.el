@@ -46,7 +46,7 @@
 ;;; variables
 
 (defvar vr--command-python-default
-  (format "python %s"
+  (format "python \"%s\""
           (shell-quote-argument (expand-file-name "regexp.py"
                                                   (file-name-directory load-file-name)))))
 
