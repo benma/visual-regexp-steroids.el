@@ -297,7 +297,9 @@ and the message line."
                 (format "%s matches --regexp %s %s %s"
                         (vr--get-command)
                         (shell-quote-argument regexp-string)
-                        (when feedback-limit (format "--feedback-limit %s" feedback-limit))
+                        (if feedback-limit
+                            (format "--feedback-limit %s" feedback-limit)
+                          "")
                         (if forward "" "--backwards"))
                 (lambda (output)
                   (vr--parse-matches
