@@ -32,7 +32,7 @@ You can choose the engine (e.g. to fall back to the Emacs regexp engine) with `v
 (define-key esc-map (kbd "C-r") 'vr/isearch-backward) ;; C-M-r
 (define-key esc-map (kbd "C-s") 'vr/isearch-forward) ;; C-M-s
 ```
-To customize, use `M-x customize-group [RET] visual-regexp`. You can specify which engine to use by modifying `vr/engine` (defaults to Python), and how the Python interpreter is invoked by modifying the `vr/command-python` variable. The default is `python /path/to/visual-regexp-steroids/regexp.py`.
+To customize, use `M-x customize-group [RET] visual-regexp`. You can specify which engine to use by modifying `vr/engine` (defaults to Python), and how the Python interpreter is invoked by modifying the `vr--python-interpreter` variable. The default is `python`.
 
 ## Examples
 
