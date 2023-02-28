@@ -44,10 +44,13 @@
 (require 'visual-regexp)
 
 ;;; variables
-(defvar vr--python-interpreter "python")
+(defcustom vr/python-interpreter "python3"
+  "Name of current python interpreter on current machine."
+  :type 'string
+  :group 'visual-regexp)
 
 (defvar vr--command-python-default
-  (format "%s %s" vr--python-interpreter (expand-file-name "regexp.py" (file-name-directory load-file-name))))
+  (format "%s %s" vr/python-interpreter (expand-file-name "regexp.py" (file-name-directory load-file-name))))
 
 (defcustom vr/command-python vr--command-python-default
   "External command used for the Python engine."
